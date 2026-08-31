@@ -1,0 +1,53 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Author: Siddh Raman Pant <@siddhpant on GitHub>
+
+# Note: Indentation here is of 2 spaces.
+
+name: Updater
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch: {}  # For manual switch.
+
+  schedule:  # Every 6 hours.
+    - cron: 0 */6 * * *
+
+  push:  # Whenever we update this workflow file.
+    branches:
+      - siddh-github-info
+    paths:
+      - '.github/workflows/action.yml'
+# End of on.
+
+jobs:
+  scheduled:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout origin
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0  # Fetch all history for all tags and branches.
+
+      - name: Add upstream remote
+        run: git remote add upstream git://sourceware.org/git/binutils-gdb.git
+
+      - name: Fetch upstream
+        run: git fetch upstream
+
+      - name: Force-update local branches to upstream
+        run: git fetch upstream '+refs/heads/*:refs/heads/*'
+
+      - name: Push branches to origin
+        run: git push origin --all --force
+
+      - name: Push tags to origin
+        run: git push origin --tags --force
+    # End of steps.
+  # End of scheduled.
+# End of jobs.
+
+
+# End of file.
